@@ -53,7 +53,7 @@ class Chart extends Component {
             fill={colorCodes[i]}
             animationDuration={300}
             yAxisId="1"
-            connectNulls={true}
+            connectNulls={false}
           />,
         );
         count = count + 1;
@@ -75,7 +75,7 @@ class Chart extends Component {
               fill={colorCodeCooldowns[i]}
               animationDuration={300}
               yAxisId="2"
-              connectNulls={true}
+              connectNulls={false}
             />,
           );
           count = count + 1;
@@ -121,18 +121,20 @@ class Chart extends Component {
   };
 
   data2Show = (dataToShow, cooldownsToShow) => {
-    return this.props.mitigatedOnly;
+    console.log(this.props.cooldownsOnly)
+    console.log(this.props.unmitigated)
+    return this.props.cooldownsOnly;
     if (dataToShow === "unmitigated" && cooldownsToShow === "log") {
-      return this.props.unmitigated;
+      return this.props.cooldowns;
     }
     if (dataToShow === "unmitigated" && cooldownsToShow === "user") {
-      return this.props.unmitigatedCooldowns;
+      return this.props.cooldowns;
     }
     if (dataToShow === "mitigated" && cooldownsToShow === "log") {
-      return this.props.mitigated;
+      return this.props.cooldowns;
     }
     if (dataToShow === "mitigated" && cooldownsToShow === "user") {
-      return this.props.mitigatedCooldowns;
+      return this.props.cooldowns;
     }
   };
 

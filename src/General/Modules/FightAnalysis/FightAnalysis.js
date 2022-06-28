@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Typography, Collapse, CircularProgress, Grid, Dialog, Divider, Paper, Grow, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import LogLinkInput from "../../SystemTools/LogImport/LogLinkInput";
 import Chart from "./Chart/Chart";
+import CooldownChart from "./Chart/CooldownChart";
 import Example from "./Components/DTPSBarChart";
 import FightSelectorButton from "../../SystemTools/LogImport/FightSelectorButton";
 import LoadingOverlay from "react-loading-overlay";
@@ -49,6 +50,8 @@ class FightAnalysis extends Component {
       abilityList: ["Melee"],
       /* ------------- Array of Cooldowns in the fight. Format: 'Ptolemy - Avenging Wrath' ------------ */
       cooldownlist: ["none"],
+      cooldownsOnly: [],
+      mitigatedOnly: [],
       /* ------------- Controls whether the loading spinner shows while the log is loading ------------ */
       loadingcheck: false,
       /* -------------- Boss Name Returned from the log (localized from report language) -------------- */
@@ -386,11 +389,46 @@ class FightAnalysis extends Component {
                       endtime={fightDuration(this.state.currentEndTime, this.state.currentStartTime)}
                       customCooldowns={this.state.cooldownlistcustom2}
                       showcds={true}
+                      mitigatedOnly={this.state.mitigatedOnly}
                     />
                   </LoadingOverlay>
                 </Collapse>
-              </Grid>
 
+
+              </Grid>
+              {/* ---------------------------- Imported Log Damage / Cooldown Chart ---------------------------- */}
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={12}
+                lg={12}
+                xl={12}
+                style={{
+                  display: this.state.logSupplied ? "block" : "none",
+                }}
+              >
+                              {/* Healing Cooldowns */}
+                <Collapse in={this.state.logSupplied}>
+                <LoadingOverlay active={spinnershow} spinner={<CircularProgress color="secondary" />}>
+                  <CooldownChart
+                      dataToShow={this.state.chartData}
+                      mitigated={this.state.mitigatedChartData}
+                      unmitigated={this.state.unmitigatedChartData}
+                      mitigatedCooldowns={this.state.mitigatedChartDataNoCooldowns}
+                      unmitigatedCooldowns={this.state.unmitigatedChartDataNoCooldowns}
+                      abilityList={this.state.abilityList}
+                      legendata={this.state.legenddata}
+                      cooldownsToShow={this.state.customCooldownsOnChart}
+                      cooldown={this.state.cooldownlist}
+                      cooldownsOnly={this.state.cooldownsOnly}
+                      endtime={fightDuration(this.state.currentEndTime, this.state.currentStartTime)}
+                      customCooldowns={this.state.cooldownlistcustom2}
+                      showcds={true}
+                  />
+                </LoadingOverlay>
+                </Collapse>
+              </Grid>
               {/* ----------------------------- Grid Container for the log details ----------------------------- */}
               {/* ---------------- Cooldown / External Timeline / Healer Info Cards / DTPS by ability --------------- */}
               <Grid item container>

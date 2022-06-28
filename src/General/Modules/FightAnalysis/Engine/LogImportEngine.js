@@ -47,6 +47,8 @@ export default async function updatechartdata(starttime, endtime) {
   let sortedDataUnmitigatedNoCooldowns = [];
   let sortedDataMitigatedDamageNoCooldowns = [];
   let damagingAbilities = [];
+  let sortedCooldownsOnly = [];
+  let sortedMitigatedOnly = [];
 
   /* ---- Fight Length of the selected report is calculated and coverted to seconds as a string --- */
   const fightLength = moment.duration(fightDuration(endtime, starttime)).asSeconds().toString();
@@ -68,6 +70,7 @@ export default async function updatechartdata(starttime, endtime) {
   const damage = await importDamageLogData(starttime, endtime, this.state.reportid);
 
   const health = await importRaidHealth(starttime, endtime, this.state.reportid);
+
 
   /* --------------------------- Map Healer Data for ID, Name and Class. -------------------------- */
   const healerIDName = healers.map((key) => ({
@@ -96,12 +99,14 @@ export default async function updatechartdata(starttime, endtime) {
   const enemyCasts = await importEnemyCasts(starttime, endtime, this.state.reportid);
 
   /* ---------------- Map the damaging abilities and guids to an array of objects. ---------------- */
+
   damage.map((key) =>
     damagingAbilities.push({
       ability: key.ability.name,
       guid: key.ability.guid,
     }),
   );
+
 
   /* ---------------- Filter the array to unique entries for Ability name and Guid. --------------- */
   const uniqueArray = damagingAbilities.filter((ele, ind) => ind === damagingAbilities.findIndex((elem) => elem.ability === ele.ability && elem.guid === ele.guid));
@@ -290,23 +295,32 @@ export default async function updatechartdata(starttime, endtime) {
   let mitigatedDamageFromLogWithTimesAddedNoCooldowns = mitigatedDamageMap.concat(times);
   mitigatedDamageFromLogWithTimesAddedNoCooldowns = mitigatedDamageFromLogWithTimesAddedNoCooldowns.concat(healthUpdated);
 
+  let cooldownsOnly = [...cooldownwithdurations];
+  let mitigatedOnly = [...mitigatedDamageMap].concat(times).concat(healthUpdated);
+
   /* -------------------------------- Sort the Arrays by Timestamp -------------------------------- */
   unmitigatedDamageFromLogWithTimesAddedAndCooldowns.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
   mitigatedDamageFromLogWithTimesAddedAndCooldowns.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
   unmitigatedDamageFromLogWithTimesAddedNoCooldowns.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
   mitigatedDamageFromLogWithTimesAddedNoCooldowns.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+  cooldownsOnly.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+  mitigatedOnly.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
 
   /* -------------------- Reduce the arrays removing any duplicate timestamps// ------------------- */
   let unmitigatedDamageTimestampsReducedWithCooldowns = reduceTimestamps(unmitigatedDamageFromLogWithTimesAddedAndCooldowns);
   let mitigatedDamageTimestampsReducedWithCooldowns = reduceTimestamps(mitigatedDamageFromLogWithTimesAddedAndCooldowns);
   let unmitigatedDamageTimestampsReducedNoCooldowns = reduceTimestamps(unmitigatedDamageFromLogWithTimesAddedNoCooldowns);
   let mitigatedDamageTimestampsReducedNoCooldowns = reduceTimestamps(mitigatedDamageFromLogWithTimesAddedNoCooldowns);
+  cooldownsOnly = reduceTimestamps(cooldownsOnly);
+  mitigatedOnly = reduceTimestamps(mitigatedOnly);
 
   /* ------------------------------------- Push To new arrays ------------------------------------- */
   Object.keys(unmitigatedDamageTimestampsReducedWithCooldowns).forEach((element) => sortedDataUnmitigatedWithCooldowns.push(unmitigatedDamageTimestampsReducedWithCooldowns[element]));
   Object.keys(mitigatedDamageTimestampsReducedWithCooldowns).forEach((element) => sortedDataMitigatedDamageWithCooldowns.push(mitigatedDamageTimestampsReducedWithCooldowns[element]));
   Object.keys(unmitigatedDamageTimestampsReducedNoCooldowns).forEach((element) => sortedDataUnmitigatedNoCooldowns.push(unmitigatedDamageTimestampsReducedNoCooldowns[element]));
   Object.keys(mitigatedDamageTimestampsReducedNoCooldowns).forEach((element) => sortedDataMitigatedDamageNoCooldowns.push(mitigatedDamageTimestampsReducedNoCooldowns[element]));
+  Object.keys(cooldownsOnly).forEach((element) => sortedCooldownsOnly.push(cooldownsOnly[element]));
+  Object.keys(mitigatedOnly).forEach((element) => sortedMitigatedOnly.push(mitigatedOnly[element]));
 
   /* ---------------------------------------------------------------------------------------------- */
   /*                                    DTPS Graph data creation                                    */
@@ -349,10 +363,15 @@ export default async function updatechartdata(starttime, endtime) {
     mitigatedChartDataNoCooldownsOriginal: sortedDataMitigatedDamageNoCooldowns,
     mitigatedChartDataNoCooldowns: sortedDataMitigatedDamageNoCooldowns,
 
+    cooldownsOnly: sortedCooldownsOnly,
+    mitigatedOnly: sortedMitigatedOnly,
+
     legenddata: uniqueArrayNewForLegend,
     /* ------------------ Unmitigated Chart Data - With Cooldowns Used from the log ----------------- */
     unmitigatedChartData: sortedDataUnmitigatedWithCooldowns,
     mitigatedChartData: sortedDataMitigatedDamageWithCooldowns,
+
+
 
     Updateddatacasts: updateddatacastsTimeline,
     abilityList: uniqueArray,
