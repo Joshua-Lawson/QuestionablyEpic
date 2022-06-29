@@ -71,7 +71,6 @@ export default async function updatechartdata(starttime, endtime) {
 
   const health = await importRaidHealth(starttime, endtime, this.state.reportid);
 
-
   /* --------------------------- Map Healer Data for ID, Name and Class. -------------------------- */
   const healerIDName = healers.map((key) => ({
     id: key.id,
@@ -106,7 +105,6 @@ export default async function updatechartdata(starttime, endtime) {
       guid: key.ability.guid,
     }),
   );
-
 
   /* ---------------- Filter the array to unique entries for Ability name and Guid. --------------- */
   const uniqueArray = damagingAbilities.filter((ele, ind) => ind === damagingAbilities.findIndex((elem) => elem.ability === ele.ability && elem.guid === ele.guid));
@@ -295,7 +293,7 @@ export default async function updatechartdata(starttime, endtime) {
   let mitigatedDamageFromLogWithTimesAddedNoCooldowns = mitigatedDamageMap.concat(times);
   mitigatedDamageFromLogWithTimesAddedNoCooldowns = mitigatedDamageFromLogWithTimesAddedNoCooldowns.concat(healthUpdated);
 
-  let cooldownsOnly = [...cooldownwithdurations];
+  let cooldownsOnly = [...cooldownwithdurations].concat(times);
   let mitigatedOnly = [...mitigatedDamageMap].concat(times).concat(healthUpdated);
 
   /* -------------------------------- Sort the Arrays by Timestamp -------------------------------- */
@@ -370,8 +368,6 @@ export default async function updatechartdata(starttime, endtime) {
     /* ------------------ Unmitigated Chart Data - With Cooldowns Used from the log ----------------- */
     unmitigatedChartData: sortedDataUnmitigatedWithCooldowns,
     mitigatedChartData: sortedDataMitigatedDamageWithCooldowns,
-
-
 
     Updateddatacasts: updateddatacastsTimeline,
     abilityList: uniqueArray,
