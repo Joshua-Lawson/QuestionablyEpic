@@ -127,28 +127,23 @@ export function getValidWeaponTypes(spec, slot) {
 // We should be calculating best gem dynamically and returning that instead but this is a temporary stop gap that should be good 90% of the time.
 export function getGems(spec, gemCount, bonus_stats) {
   if (spec === "Preservation Evoker" || spec === "Holy Priest") {
-    // 
+    //
     bonus_stats.mastery += 70 * gemCount;
     bonus_stats.crit += 33 * gemCount;
     return 192958;
-  }
-  else if (spec === "Restoration Druid" || spec === "Holy Paladin") {
+  } else if (spec === "Restoration Druid" || spec === "Holy Paladin") {
     bonus_stats.haste += 70 * gemCount;
     bonus_stats.mastery += 33 * gemCount;
     return 192948;
-  }
-  else if (spec === "Discipline Priest" || spec === "Mistweaver Monk") {
+  } else if (spec === "Discipline Priest" || spec === "Mistweaver Monk") {
     bonus_stats.haste += 70 * gemCount;
     bonus_stats.crit += 33 * gemCount;
     return 192945;
-  }
-  else if (spec === "Restoration Shaman") {
-
+  } else if (spec === "Restoration Shaman") {
     bonus_stats.crit += 70 * gemCount;
     bonus_stats.versatility += 33 * gemCount;
     return 192923;
-  }
-  else {
+  } else {
     // This should never be called.
     bonus_stats.haste += 70 * gemCount;
     bonus_stats.mastery += 33 * gemCount;
@@ -157,20 +152,17 @@ export function getGems(spec, gemCount, bonus_stats) {
 }
 
 export function getGemProp(id, prop) {
-    let temp = gemDB.filter(function (gem) {
-      return gem.id === id;
-    });
+  let temp = gemDB.filter(function (gem) {
+    return gem.id === id;
+  });
 
-    if (temp.length > 0) {
-      const gem = temp[0];
+  if (temp.length > 0) {
+    const gem = temp[0];
 
-      if (prop === "name") return gem.name.en || "";
-      else if (gem !== "" && prop in gem) return gem[prop];
-      else return ""
-
-    }
+    if (prop === "name") return gem.name.en || "";
+    else if (gem !== "" && prop in gem) return gem[prop];
     else return "";
-
+  } else return "";
 }
 
 export function getValidWeaponTypesBySpec(spec) {
@@ -211,8 +203,10 @@ export function filterClassicItemListBySource(itemList, sourceInstance, sourceBo
 }
 
 export function getItemLevelBoost(bossID) {
-  if (bossID ===  2502 || bossID === 2424) return 6;    // Dathea and Kurog 
-  else if (bossID === 2493 || bossID === 2499) return 9; // Broodkeeper and Raszageth
+  if (bossID === 2502 || bossID === 2424) return 6;
+  // Dathea and Kurog
+  else if (bossID === 2493 || bossID === 2499) return 9;
+  // Broodkeeper and Raszageth
   else return 0;
 }
 
@@ -221,8 +215,8 @@ export function filterItemListBySource(itemList, sourceInstance, sourceBoss, lev
     let itemEncounter = item.source.encounterId;
     let expectedItemLevel = level;
     const boostedItems = [195480, 195526, 194301];
-    
-    if ('source' in item && item.source.instanceId === 1200) expectedItemLevel += getItemLevelBoost(itemEncounter) + (boostedItems.includes(item.id) ? 6 : 0);
+
+    if ("source" in item && item.source.instanceId === 1200) expectedItemLevel += getItemLevelBoost(itemEncounter) + (boostedItems.includes(item.id) ? 6 : 0);
     else if (item.source.instanceId === 1205) expectedItemLevel = 389;
 
     //else if (sourceInstance === -17 && pvpRank === 5 && ["1H Weapon", "2H Weapon", "Offhand", "Shield"].includes(item.slot)) expectedItemLevel += 7;
@@ -231,7 +225,6 @@ export function filterItemListBySource(itemList, sourceInstance, sourceBoss, lev
 
   return temp;
 }
-
 
 export function filterItemListByType(itemList, slot) {
   let temp = itemList.filter(function (item) {
@@ -289,9 +282,7 @@ export function getTranslatedItemName(id, lang, effect, gameType = "Retail") {
 
 // Returns a translated item name based on an ID.
 export function getTranslatedEmbellishment(id, lang) {
-
   let temp = embellishmentDB.filter(function (embel) {
-
     return embel.id === id;
   });
   if (temp.length > 0) return temp[0].name[lang];
@@ -372,7 +363,6 @@ export function getGemIcon(id) {
     return "https://wow.zamimg.com/images/wow/icons/large/" + gem[0].icon + ".jpg";
   }
 }
-
 
 export function checkDefaultSocket(id) {
   let temp = itemDB.filter(function (item) {
@@ -471,7 +461,7 @@ export function buildWepCombos(player, active = false, equipped = false) {
         item.stats = sumObjectsByKey(main_hand.stats, off_hand.stats);
         item.stats.bonus_stats = {};
         item.vaultItem = main_hand.vaultItem || off_hand.vaultItem;
-        item.uniqueEquip = item.vaultItem ? "vault" : (main_hand.uniqueEquip || off_hand.uniqueEquip);
+        item.uniqueEquip = item.vaultItem ? "vault" : main_hand.uniqueEquip || off_hand.uniqueEquip;
         item.softScore = main_hand.softScore + off_hand.softScore;
         item.offhandID = off_hand.id;
         item.mainHandLevel = main_hand.level;
@@ -515,7 +505,6 @@ export function calcStatsAtLevel(itemLevel, slot, statAllocations, tertiary) {
     bonus_stats: {},
   };
 
-  
   let rand_prop = randPropPoints[itemLevel]["slotValues"][getItemCat(slot)];
   if (slot == "Finger" || slot == "Neck") combat_mult = combat_ratings_mult_by_ilvl_jewl[itemLevel];
   else combat_mult = combat_ratings_mult_by_ilvl[itemLevel];
@@ -675,7 +664,7 @@ export function socketItem(item, player) {
 
 // Compiles stats & bonus stats into one array to which we can then apply DR etc.
 // TODO, this is identical to TopGearShared, so put it somewhere accessible to both.
-function compileStats(stats, bonus_stats) {
+export function compileStats(stats, bonus_stats) {
   for (const stat in stats) {
     if (stat !== "bonus_stats") {
       stats[stat] += bonus_stats !== undefined && stat in bonus_stats ? bonus_stats[stat] : 0;
@@ -717,7 +706,7 @@ function applyClassicStatMods(spec, setStats) {
 // Special effects, sockets and leech are then added afterwards.
 export function scoreItem(item, player, contentType, gameType = "Retail", playerSettings = {}) {
   let score = 0;
-  let bonus_stats = {mastery: 0, crit: 0, versatility: 0, intellect: 0, haste: 0};
+  let bonus_stats = { mastery: 0, crit: 0, versatility: 0, intellect: 0, haste: 0 };
   let item_stats = { ...item.stats };
 
   // Calculate Effect.
@@ -726,10 +715,10 @@ export function scoreItem(item, player, contentType, gameType = "Retail", player
     bonus_stats = compileStats(bonus_stats, effectStats);
   }
 
-    // Add Retail Socket
+  // Add Retail Socket
   if (item.socket) {
     getGems(player.spec, item.socket || 1, bonus_stats);
-    //score += 88 * player.getStatWeight(contentType, player.getHighestStatWeight(contentType)) * (item.socket || 1); 
+    //score += 88 * player.getStatWeight(contentType, player.getHighestStatWeight(contentType)) * (item.socket || 1);
   }
 
   // Multiply the item's stats by our stat weights.
@@ -758,8 +747,6 @@ export function scoreItem(item, player, contentType, gameType = "Retail", player
     score += ((bonus_stats.mana * player.getSpecialQuery("OneManaHealing", contentType)) / player.getHPS(contentType)) * player.activeStats.intellect;
   }
 
-
-
   // Add any group benefit, if we're interested in it.
   if (userSettings.includeGroupBenefits && "bonus_stats" in item_stats && "allyStats" in bonus_stats) {
     score += 0.35 * bonus_stats.allyStats; // TODO: Move this somewhere nice.
@@ -773,7 +760,10 @@ export function scoreItem(item, player, contentType, gameType = "Retail", player
 
   return Math.round(100 * score) / 100;
 }
-function sumObjectsByKey(...objs) {
+
+export function sumObjectsByKey(...objs) {
+  // sumObjectsByKey takes multiple objects as input and combines the values of matching keys.
+  // If a key is not present in the combined object, it is added with the value of the corresponding key in the current object.
   return objs.reduce((a, b) => {
     for (let k in b) {
       if (b.hasOwnProperty(k)) a[k] = (a[k] || 0) + b[k];
