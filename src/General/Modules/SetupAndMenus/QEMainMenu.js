@@ -160,19 +160,19 @@ export default function QEMainMenu(props) {
                   height: "60px",
                   // whiteSpace: "nowrap",
                   // justifyContent: "left",
-                  paddingLeft: "20px",
+                  //
                   textTransform: "none",
                   color: mainMenuOptions[key][1] && characterCount > 0 ? "#F2BF59" : "#9c9c9c",
                 }}
                 component={Link}
                 to={mainMenuOptions[key][0]}
               >
-                <Grid container spacing={1.5} alignItems="center">
+                <Grid container spacing={1.5} alignItems="center" sx={{ paddingLeft: "5px" }}>
                   <Grid item xs="auto">
                     <ArrowForward
                       style={{
                         verticalAlign: "middle",
-                        paddingRight: 10
+                        // paddingRight: 10
                       }}
                     />
                   </Grid>
