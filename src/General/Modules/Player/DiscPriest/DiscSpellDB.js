@@ -522,9 +522,8 @@ export const baseTalents = {
     deathAndMadness: {points: 1, maxPoints: 1, icon: "spell_shadow_demonicfortitude", id: 321291, select: true, tier: 4},
     wordsOfThePious: {points: 0, maxPoints: 1, icon: "ability_priest_clarityofwill", id: 377438, select: true, tier: 4},
     unwaveringWill: {points: 1, maxPoints: 1, icon: "ability_warrior_unrelentingassault", id: 373456, select: false, tier: 4},
-    //twistOfFaith:
+    twistOfFaith: {points: 2, maxPoints: 2, icon: "spell_shadow_mindtwisting", id: 109142, select: true, tier: 4},
     throesOfPain: {points: 2, maxPoints: 2, icon: "spell_shadow_haunting", id: 377427, select: true, tier: 4},
-    
     surgeOfLight: {points: 2, maxPoints: 2, icon: "spell_holy_surgeoflight", id: 114255, select: true, tier: 4},
     crystallineReflection: {points: 0, maxPoints: 2, icon: "ability_priest_reflectiveshield", id: 373457, select: true, tier: 4},
     //manipulation:

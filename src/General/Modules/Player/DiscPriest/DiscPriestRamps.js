@@ -31,6 +31,7 @@ export const DISCCONSTANTS = {
             16: 1.025, 17: 1.02, 18: 1.015, 19: 1.0125, 20: 1.01},
     shieldDisciplineEfficiency: 0.8,
 }   
+var discConstants;
 
 
 /**  Extend all active atonements by @extension seconds. This is triggered by Evanglism / Spirit Shell. */
@@ -51,14 +52,14 @@ const extendActiveAtonements = (atoneApp, timer, extension) => {
  * @AscendedEruption A special buff for the Ascended Eruption spell only. The multiplier is equal to 3% (4 with conduit) x the number of Boon stacks accrued.
  */
 const getDamMult = (state, buffs, activeAtones, t, spellName, talents, spell) => {
-    const sins = DISCCONSTANTS.sins;
+    const sins = discConstants.sins;
     let schism = 1;
 
     if (spellName !== "Mindbender" && spellName !== "Shadowfiend") {
         schism = buffs.filter(function (buff) {return buff.name === "Schism"}).length > 0 ? 1.15 : 1; 
     }
     
-    let mult = schism //* sins[activeAtones];
+    let mult = schism * sins[activeAtones] * discConstants.auraDamageBuff;
     //console.log("Spell: " + spellName + ". Mult: " + mult);
     if (discSettings.chaosBrand) mult = mult * 1.05;
     if (spellName === "PenanceTick") {
@@ -114,7 +115,7 @@ const penanceCleanup = (state) => {
  * @ascendedEruption The healing portion also gets a buff based on number of boon stacks on expiry.
  */
 const getHealingMult = (state, buffs, spellName, spell) => {
-    let mult = DISCCONSTANTS.auraHealingBuff;
+    let mult = discConstants.auraHealingBuff;
     if (spellName === "Power Word: Shield" && checkBuffActive(buffs, "Rapture")) {
         mult *= 1.4;
     }
@@ -133,7 +134,7 @@ const getHealingMult = (state, buffs, spellName, spell) => {
         }
     }
     if (checkBuffActive(buffs, "Weal & Woe") && spellName === "Power Word: Shield") {
-        mult *= (1 + getBuffStacks(buffs, "Weal & Woe") * 0.03);
+        mult *= (1 + getBuffStacks(buffs, "Weal & Woe") * 0.05);
         state.activeBuffs = removeBuff(state.activeBuffs, "Weal & Woe");
     }
     if (checkBuffActive(buffs, "Light Weaving")) {
@@ -169,7 +170,7 @@ const getActiveAtone = (atoneApp, timer) => {
 // to this function can be considered post-DR.
 const getAtoneTrans = (mastery) => {
     const atonementBaseTransfer = 0.4;
-    return atonementBaseTransfer * (1.108 + mastery / 180 * DISCCONSTANTS.masteryMod / 100);
+    return atonementBaseTransfer * (1.108 + mastery / 180 * discConstants.masteryMod / 100);
 }
 
 const getSqrt = (targets, sqrtMin) => {
@@ -185,7 +186,7 @@ const getTime = (t) => {
 // Some spells do more than the usual amount of atonement healing. An example might be through Abssal Reverie.
 // We'll handle those here.
 const getAtonementBonus = (state, spellName, spell) => {
-    return DISCCONSTANTS.atonementMults[getSpellSchool(state, spellName, spell)] || 1
+    return discConstants.atonementMults[getSpellSchool(state, spellName, spell)] || 1
 }
 
 // Get a spells school.
@@ -193,7 +194,7 @@ const getAtonementBonus = (state, spellName, spell) => {
 // some spells to Shadow so we'll handle all of that in this function here.
 const getSpellSchool = (state, spellName, spell) => {
     let spellSchool = "";
-    if (DISCCONSTANTS.shadowCovenantSpells.includes(spellName) && checkBuffActive(state.activeBuffs, "Shadow Covenant")) spellSchool = "shadow";
+    if (discConstants.shadowCovenantSpells.includes(spellName) && checkBuffActive(state.activeBuffs, "Shadow Covenant")) spellSchool = "shadow";
     else spellSchool = spell.school || "";
     //console.log(spellName + " " + spellSchool)
     return spellSchool;
@@ -209,8 +210,8 @@ export const runHeal = (state, spell, spellName, specialMult = 1) => {
     const targetMult = (('tags' in spell && spell.tags.includes('sqrt')) ? getSqrt(spell.targets, spell.sqrtMin) : spell.targets) || 1;
     const flatHealBonus = (spellName === "Power Word: Shield" && checkBuffActive(state.activeBuffs, "T29_4")) ? state.activeBuffs.filter(function (buff) {return buff.name === "T29_4"})[0].value : 0
 
-    const healingVal = getSpellRaw(spell, currentStats, DISCCONSTANTS, flatHealBonus) * (1 - spell.overheal) * healingMult * targetMult;
-    //console.log("Healing value: " + getSpellRaw(spell, currentStats, DISCCONSTANTS));
+    const healingVal = getSpellRaw(spell, currentStats, discConstants, flatHealBonus) * (1 - spell.overheal) * healingMult * targetMult;
+    //console.log("Healing value: " + getSpellRaw(spell, currentStats, discConstants));
     state.healingDone[spellName] = (state.healingDone[spellName] || 0) + healingVal;
 
     if (!spellName.includes("hot") || true) {
@@ -229,7 +230,7 @@ export const runHeal = (state, spell, spellName, specialMult = 1) => {
             atoneOverheal: 0,
             school: "holy",
             secondaries: ['crit', 'vers'],
-            flatDamage: getSpellRaw(spell, currentStats, DISCCONSTANTS) * healingMult * 0.1 * state.talents.crystallineReflection
+            flatDamage: getSpellRaw(spell, currentStats, discConstants) * healingMult * 0.1 * state.talents.crystallineReflection
         };
         runDamage(state, reflection, "Crystalline Reflection", []);
     }
@@ -239,7 +240,7 @@ export const runDamage = (state, spell, spellName, atonementApp) => {
 
     const activeAtonements = getActiveAtone(atonementApp, state.t); // Get number of active atonements.
     const damMultiplier = getDamMult(state, state.activeBuffs, activeAtonements, state.t, spellName, state.talents, spell); // Get our damage multiplier (Schism, Sins etc);
-    const damageVal = getSpellRaw(spell, state.currentStats, DISCCONSTANTS) * damMultiplier;
+    const damageVal = getSpellRaw(spell, state.currentStats, discConstants) * damMultiplier;
     const atonementHealing = Math.round(activeAtonements * damageVal * getAtoneTrans(state.currentStats.mastery) * (1 - spell.atoneOverheal) * getAtonementBonus(state, spellName, spell));
     // This is stat tracking, the atonement healing will be returned as part of our result.
     state.damageDone[spellName] = (state.damageDone[spellName] || 0) + damageVal; // This is just for stat tracking.
@@ -279,9 +280,11 @@ export const runCastSequence = (sequence, incStats, settings = {}, incTalents = 
     let atonementApp = []; // We'll hold our atonement timers in here. We keep them seperate from buffs for speed purposes.
     let nextSpell = 0;
 
+    // Allows auras to be changed without affecting future iterations
+    discConstants = deepCopyFunction(DISCCONSTANTS);
     // Note that any talents that permanently modify spells will be done so in this loadoutEffects function. 
     // Ideally we'll cover as much as we can in here.
-    const discSpells = applyLoadoutEffects(deepCopyFunction(DISCSPELLS), settings, talents, state, stats);
+    const discSpells = applyLoadoutEffects(deepCopyFunction(DISCSPELLS), settings, talents, state, stats, discConstants);
 
     const seq = [...sequence];
     const sequenceLength = 55; // The length of any given sequence. Note that each ramp is calculated separately and then summed so this only has to cover a single ramp.
@@ -301,7 +304,7 @@ export const runCastSequence = (sequence, incStats, settings = {}, incTalents = 
 
         // Check for any expired atonements. 
         atonementApp = atonementApp.filter(function (buff) {return buff > state.t});
-        
+         
         // ---- Heal over time and Damage over time effects ----
         // When we add buffs, we'll also attach a spell to them. The spell should have coefficient information, secondary scaling and so on. 
         // When it's time for a HoT or DoT to tick (state.t > buff.nextTick) we'll run the attached spell.

@@ -1,5 +1,5 @@
 
-import { DISCCONSTANTS } from "./DiscPriestRamps";
+import { runDamage } from "./DiscPriestRamps";
 
 /**
 * This function handles all of our effects that might change our spell database before the ramps begin.
@@ -10,7 +10,7 @@ import { DISCCONSTANTS } from "./DiscPriestRamps";
 * @param {*} talents The talents run in the current set.
 * @returns An updated spell database with any of the above changes made.
 */
-export const applyLoadoutEffects = (discSpells, settings, talents, state, stats) => {
+export const applyLoadoutEffects = (discSpells, settings, talents, state, stats, discConstants) => {
 
    // ==== Default Loadout ====
    // While Top Gear can automatically include everything at once, individual modules like Trinket Analysis require a baseline loadout
@@ -28,11 +28,12 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
 
    if (talents.throesOfPain) {
        // ASSUMPTION: Throes of Pain should work on both DoTs but let's double check anyway.
-       discSpells['Shadow Word: Pain'][0].coeff *= (1 + 0.03 * talents.throesOfPain);
-       discSpells['Purge the Wicked'][0].coeff *= (1 + 0.03 * talents.throesOfPain);
+       // Throes of Pain gives 3% / 5% for 1 / 2 points
+       discSpells['Shadow Word: Pain'][0].coeff *= (1.01 + 0.02 * talents.throesOfPain);
+       discSpells['Purge the Wicked'][0].coeff *= (1.01 + 0.02 * talents.throesOfPain);
 
-       discSpells['Shadow Word: Pain'][1].coeff *= (1 + 0.03 * talents.throesOfPain);
-       discSpells['Purge the Wicked'][1].coeff *= (1 + 0.03 * talents.throesOfPain);
+       discSpells['Shadow Word: Pain'][1].coeff *= (1.01 + 0.02 * talents.throesOfPain);
+       discSpells['Purge the Wicked'][1].coeff *= (1.01 + 0.02 * talents.throesOfPain);
    }
 
    // Disc specific talents.
@@ -45,7 +46,6 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
        discSpells['PenanceTick'].push({
            type: "buffExtension",
            buffName: "Shadow Word: Pain",
-
            extension: 1.5,
        })
        discSpells['PenanceTick'].push(
@@ -53,11 +53,11 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
            type: "buffExtension",
            buffName: "Purge the Wicked",
            extension: 1.5,
-   })
+        })
    }
    if (talents.maliciousIntent) discSpells['Schism'][1].buffDuration += 6;
-   if (talents.enduringLuminescence) discSpells['Power Word: Radiance'][0].atonement *= 1.1;
-   if (talents.shieldDiscipline) discSpells['Power Word: Shield'][0].cost -= (0.5 * DISCCONSTANTS.shieldDisciplineEfficiency);
+   if (talents.enduringLuminescence) discSpells['Power Word: Radiance'][0].atonement += .1 * 15;
+   if (talents.shieldDiscipline) discSpells['Power Word: Shield'][0].cost -= (0.5 * discConstants.shieldDisciplineEfficiency);
 
    // Tier 2 talents
    if (talents.revelInPurity) {
@@ -69,10 +69,10 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
    }
    if (talents.painAndSuffering) {
        // ASSUMPTION: Throes of Pain should work on both DoTs but let's double check anyway.
-       discSpells['Shadow Word: Pain'][0].coeff *= (1 + 0.075 * talents.painAndSuffering);
-       discSpells['Purge the Wicked'][0].coeff *= (1 + 0.075 * talents.painAndSuffering);
-       discSpells['Shadow Word: Pain'][1].coeff *= (1 + 0.075 * talents.painAndSuffering);
-       discSpells['Purge the Wicked'][1].coeff *= (1 + 0.075 * talents.painAndSuffering);
+       discSpells['Shadow Word: Pain'][0].coeff *= (1.01 + 0.07 * talents.painAndSuffering);
+       discSpells['Purge the Wicked'][0].coeff *= (1.01 + 0.07 * talents.painAndSuffering);
+       discSpells['Shadow Word: Pain'][1].coeff *= (1.01 + 0.07 * talents.painAndSuffering);
+       discSpells['Purge the Wicked'][1].coeff *= (1.01 + 0.07 * talents.painAndSuffering);
    }
    if (talents.borrowedTime) {
        discSpells['Power Word: Shield'].push({
@@ -99,7 +99,11 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
            }
        })
    }
-   if (talents.stolenPsyche) discSpells['Mind Blast'][0].atonementBonus = (1 + 0.2 * talents.stolenPsyche);
+
+   // Renamed to Abyssal Reverie
+   if (talents.stolenPsyche) {
+        discConstants.atonementMults.shadow *= (1 + 0.1 * talents.stolenPsyche);
+   }
 
    // Tier 3 talents
    if (talents.trainOfThought) {
@@ -134,8 +138,8 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
        state.activeBuffs.push({name: "Harsh Discipline", expiration: 999, buffType: "special", value: 3, stacks: 1, canStack: false})
    }
    if (talents.expiation) {
-       discSpells["Mind Blast"][0].coeff *= 1.1;
-       discSpells["Shadow Word: Death"][0].coeff *= 1.1;
+       discSpells["Mind Blast"][0].coeff *= 1 + 0.1 * talents.expiation;
+       discSpells["Shadow Word: Death"][0].coeff *= 1 + 0.1 * talents.expiation;
        // TODO: Add special function to Mindblast / SWD spell that consumes SWP
        discSpells["Mind Blast"].push(
        {
@@ -236,8 +240,16 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
    }
 
    // Settings
-   if (settings.execute === "Always") discSpells["Shadow Word: Death"][0].coeff *= 2.5
-   else if (settings.execute === "20% of the time") discSpells["Shadow Word: Death"][0].coeff *= (2.5 * 0.2 + 0.8);
+   if (settings.execute === "Always") {
+        discSpells["Shadow Word: Death"][0].coeff *= 2.5;
+        discConstants.auraHealingBuff *= 1 + .05 * talents.twistOfFaith;
+        discConstants.auraDamageBuff *= 1 + .05 * talents.twistOfFaith;
+   }
+   else if (settings.execute === "20% of the time") {
+        discSpells["Shadow Word: Death"][0].coeff *= (2.5 * 0.2 + 0.8);
+        discConstants.auraHealingBuff *= 1 + .05 * talents.twistOfFaith * 0.2;
+        discConstants.auraDamageBuff *= 1 + .05 * talents.twistOfFaith * 0.2;
+   }
        
    if (settings.T29_2) {
        // Power Word: Shield increases the damage of the next cast by 10%.
@@ -346,7 +358,7 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats)
 
        if (!spell.targets) spell.targets = 1;
        if (spell.cooldown) spell.activeCooldown = 0;
-       if (spell.cost) spell.cost = spell.cost * DISCCONSTANTS.baseMana / 100;
+       if (spell.cost) spell.cost = spell.cost * discConstants.baseMana / 100;
 
        if (settings.includeOverheal === "No") {
            value.forEach(spellSlice => {
