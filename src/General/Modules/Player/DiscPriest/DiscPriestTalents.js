@@ -239,6 +239,12 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats,
        })
    }
 
+    // Assumes 100% uptime on being above 75% hp
+   if (talents.unwaveringWill) {
+        discSpells["Flash Heal"].castTime *= (1 - .05 * talents.unwaveringWill);
+        discSpells["Smite"].castTime *= (1 - .05 * talents.unwaveringWill);
+   }
+
    // Settings
    if (settings.execute === "Always") {
         discSpells["Shadow Word: Death"][0].coeff *= 2.5;

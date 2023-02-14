@@ -8,8 +8,9 @@ import { applyLoadoutEffects } from "./DiscPriestTalents";
 
 // Any settings included in this object are immutable during any given runtime. Think of them as hard-locked settings.
 const discSettings = {
-    chaosBrand: true,
-    critMult: 2,
+    // true and 2, fix when done testing
+    chaosBrand: false,
+    critMult: 1,
 
     aegisOfWrathWastage: 0.06 // Consumed within 2 seconds on average.
 }
@@ -274,8 +275,8 @@ export const runCastSequence = (sequence, incStats, settings = {}, incTalents = 
 
     let state = {t: 0, report: [], activeBuffs: [], healingDone: {}, damageDone: {}, manaSpent: 0, settings: settings, talents: talents, reporting: true}
     let stats = JSON.parse(JSON.stringify(incStats));
-    stats.critMult = 2;
-    stats.versatility += 720 // Phial.
+    stats.critMult = discSettings.critMult;
+    // stats.versatility += 720 // Phial.
 
     let atonementApp = []; // We'll hold our atonement timers in here. We keep them seperate from buffs for speed purposes.
     let nextSpell = 0;
