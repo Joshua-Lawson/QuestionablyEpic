@@ -230,6 +230,7 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats,
    if (talents.bindingHeals) {
        discSpells["Flash Heal"].push({
            type: "heal",
+           castTime: discSpells["Flash Heal"][0].castTime,
            coeff: discSpells["Flash Heal"][0].coeff * 0.2,
            atonement: 15,
            atonementPos: 'end',

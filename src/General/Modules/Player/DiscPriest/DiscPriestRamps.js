@@ -375,8 +375,7 @@ export const runCastSequence = (sequence, incStats, settings = {}, incTalents = 
                     for (var i = 0; i < spell.targets; i++) {
                         let atoneDuration = spell.atonement;
                         //if (settings['Clarity of Mind'] && (spellName === "Power Word: Shield") && checkBuffActive(state.activeBuffs, "Rapture")) atoneDuration += 6;
-                        if (spell.atonementPos === "start") atonementApp.push(state.t + atoneDuration);
-                        else if (spell.atonementPos === "end") atonementApp.push(state.t + spell.castTime + atoneDuration);
+                        atonementApp.push(state.t + atoneDuration);
 
                     }
                 }
@@ -467,11 +466,18 @@ export const runCastSequence = (sequence, incStats, settings = {}, incTalents = 
 
                 // Penance ticks are a bit weird and need to be cleaned up when we're done with them. 
                 if (spellName === "PenanceTick" && seq[0] !== "PenanceTick") penanceCleanup(state);
-                
-                // Grab the next timestamp we are able to cast our next spell. This is equal to whatever is higher of a spells cast time or the GCD.
-                
             });   
-            nextSpell += (fullSpell[0].castTime / getHaste(currentStats));
+
+            // Grab the next timestamp we are able to cast our next spell. This is equal to whatever is higher of a spells cast time or the GCD.
+            if (seq.length > 0) {
+                // incur gcd
+                if (!fullSpell[0].offGcd) {
+                    nextSpell += Math.max(0, 1.5 / getHaste(currentStats) - fullSpell[0].castTime / getHaste(currentStats));
+                }
+                
+                // queue next spell's cast
+                nextSpell += discSpells[seq[0]][0].castTime / getHaste(currentStats);
+            }
         }
     }
 

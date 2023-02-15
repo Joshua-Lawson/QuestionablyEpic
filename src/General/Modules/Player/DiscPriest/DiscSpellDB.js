@@ -49,6 +49,7 @@ export const DISCSPELLS = {
         spellData: {id: 366155, icon: "ability_evoker_reversion", cat: "N/A"},
         type: "damage",
         castTime: 2, // This will still be dynamically adjusted at runtime.
+        offGcd: true, // individual ticks won't each incur gcd
         cost: 0,
         coeff: 0.376,
         school: "holy",
@@ -70,6 +71,7 @@ export const DISCSPELLS = {
         spellData: {id: 366155, icon: "ability_evoker_reversion", cat: "N/A"},
         type: "heal",
         castTime: 2, // This will still be dynamically adjusted at runtime.
+        offGcd: true, // individual ticks won't each incur gcd
         cost: 0,
         coeff: 1.25,
         school: "holy",
@@ -112,7 +114,7 @@ export const DISCSPELLS = {
     "Power Word: Solace": [{
         spellData: {id: 129250, icon: "ability_priest_flashoflight", cat: "damage"},
         type: "damage",
-        castTime: 1.5,
+        castTime: 0,
         cost: 0,
         coeff: 0.752 * 0.85,
         cooldown: 15,
@@ -123,7 +125,7 @@ export const DISCSPELLS = {
     "Shadow Covenant": [{
         spellData: {id: 314867, icon: "spell_shadow_summonvoidwalker", cat: "heal"},
         type: "heal",
-        castTime: 1.5,
+        castTime: 0,
         cost: 4.5,
         coeff: 1.65,
         cooldown: 30,
@@ -145,7 +147,7 @@ export const DISCSPELLS = {
     "Shadow Word: Death": [{
         spellData: {id: 32379, icon: "spell_shadow_demonicfortitude", cat: "damage"},
         type: "damage",
-        castTime: 1.5,
+        castTime: 0,
         cost: 0.5,
         coeff: 0.85,
         cooldown: 9,
@@ -191,7 +193,7 @@ export const DISCSPELLS = {
     [{
         spellData: {id: 110744, icon: "spell_priest_divinestar", cat: "damage"},
         type: "damage",
-        castTime: 1.5,
+        castTime: 0,
         cost: 2,
         coeff: 0.56 * 2,
         aura: 1,
@@ -237,13 +239,12 @@ export const DISCSPELLS = {
         spellData: {id: 17, icon: "spell_holy_powerwordshield", cat: "heal"},
         name: "Power Word: Shield",
         type: "heal",
-        castTime: 1.5,
+        castTime: 0,
         cost: 3.1,
         coeff: 3.36,
         aura: 1,
         cooldown: 7.5,
         atonement: 15,
-        atonementPos: 'start',
         school: "holy",
         targets: 1,
         secondaries: ['crit', 'vers'],
@@ -253,11 +254,10 @@ export const DISCSPELLS = {
         // To check: See if Renew still has an initial heal, and confirm whether it gets a mastery buff (unlikely).
         spellData: {id: 139, icon: "spell_holy_renew", cat: "heal"},
         type: "heal",
-        castTime: 1.5,
+        castTime: 0,
         cost: 2.7,
         coeff: 0.32 * 1.25,
         atonement: 15,
-        atonementPos: 'start',
         secondaries: ['crit', 'vers'],
         overheal: 0.5,
     },
@@ -281,7 +281,6 @@ export const DISCSPELLS = {
         coeff: 2.03 * 1.25,
         cooldown: 0,
         atonement: 15,
-        atonementPos: 'end',
         targets: 1,
         secondaries: ['crit', 'vers'],
         overheal: 0.35,
@@ -291,12 +290,11 @@ export const DISCSPELLS = {
     "Rapture": [{
         spellData: {id: 47536, icon: "spell_holy_rapture", cat: "cooldown"},
         type: "heal",
-        castTime: 1.5,
+        castTime: 0,
         cost: 3.1,
         coeff: 1.65 * 3,
         cooldown: 0,
         atonement: 15,
-        atonementPos: 'start',
         targets: 1,
         secondaries: ['crit', 'vers'],
         overheal: 0,
@@ -318,14 +316,13 @@ export const DISCSPELLS = {
         targets: 5,
         cooldown: 20,
         atonement: 9, // Nerfed to 7.5, reverted to 9. 
-        atonementPos: 'end',
         secondaries: ['crit', 'vers'],
         overheal: 0.35,
     }],
     "Purge the Wicked": [{
         spellData: {id: 204197, icon: "ability_mage_firestarter", cat: "damage"},
         type: "damage",
-        castTime: 1.5,
+        castTime: 0,
         cost: 1.8,
         aura: 1,
         coeff: 0.18,
@@ -347,7 +344,7 @@ export const DISCSPELLS = {
     "Shadow Word: Pain": [{
         spellData: {id: 589, icon: "spell_shadow_shadowwordpain", cat: "damage"},
         type: "damage",
-        castTime: 1.5,
+        castTime: 0,
         cost: 0.3,
         coeff: 0.1292,
         aura: 1,
@@ -369,7 +366,7 @@ export const DISCSPELLS = {
     "Shadowfiend": [{
         spellData: {id: 34433, icon: "spell_shadow_shadowfiend", cat: "cooldown"},
         type: "",
-        castTime: 1.5,
+        castTime: 0,
         cost: 0,
         coeff: 0.46, // Unused. Change coefficient below instead.
         aura: 1,
@@ -377,7 +374,7 @@ export const DISCSPELLS = {
         atoneOverheal: 0.18,
     },
     {
-        castTime: 1.5,
+        castTime: 0,
         type: "buff",
         buffType: "damage",
         coeff: 0.46, // 
@@ -390,7 +387,7 @@ export const DISCSPELLS = {
     "Mindbender": [{
         spellData: {id: 123040, icon: "spell_shadow_soulleech_3", cat: "cooldown"},
         type: "",
-        castTime: 1.5,
+        castTime: 0,
         cost: 0,
         coeff: 0.34,
         aura: 1,
@@ -412,7 +409,7 @@ export const DISCSPELLS = {
     "Evangelism": [{
         spellData: {id: 246287, icon: "spell_holy_divineillumination", cat: "cooldown"},
         type: "atonementExtension",
-        castTime: 1.5,
+        castTime: 0,
         cost: 0,
         coeff: 0,
         cooldown: 180,
@@ -422,6 +419,7 @@ export const DISCSPELLS = {
         spellData: {id: 10060, icon: "spell_holy_powerinfusion", cat: "cooldown"},
         type: "buff",
         castTime: 0,
+        offGcd: true,
         cost: 0,
         cooldown: 120,
         buffDuration: 20,
