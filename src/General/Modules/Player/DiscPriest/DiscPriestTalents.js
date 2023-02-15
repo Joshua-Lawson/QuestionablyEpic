@@ -141,31 +141,32 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats,
        discSpells["Mind Blast"][0].coeff *= 1 + 0.1 * talents.expiation;
        discSpells["Shadow Word: Death"][0].coeff *= 1 + 0.1 * talents.expiation;
        // TODO: Add special function to Mindblast / SWD spell that consumes SWP
-       discSpells["Mind Blast"].push(
-       {
-           type: "function",
-           runFunc: function (state, atonementApp) {
-               const temp = state.activeBuffs.filter(buff => buff.name === "Purge the Wicked" || buff.name === "Shadow Word: Pain");
-               if (temp.length > 0) {
-                   const expiationDuration = 3 * talents.expiation;
-                   const buff = temp[0];
+       let expiation = {
+            type: "function",
+            runFunc: function (state, atonementApp) {
+                const temp = state.activeBuffs.filter(buff => buff.name === "Purge the Wicked" || buff.name === "Shadow Word: Pain");
+                if (temp.length > 0) {
+                    const buff = temp[0];
+                    const expiationDuration = Math.min(3 * talents.expiation, buff.expiration - state.t);
 
-                   const ticks = Math.min(expiationDuration, (buff.expiration - state.t)) / buff.tickRate; // TODO: Add Haste
-                   const attSpell = {...buff.attSpell};
-                   attSpell.coeff *= ticks;
+                    const ticks = Math.min(expiationDuration, (buff.expiration - state.t)) / buff.tickRate; // TODO: Add Haste
+                    const attSpell = {...buff.attSpell};
+                    attSpell.coeff *= ticks;
 
-                   runDamage(state, attSpell, "Expiation", atonementApp);
+                    runDamage(state, attSpell, "Expiation", atonementApp);
 
-                   buff.expiration -= expiationDuration;
-                   if (state.t > buff.expiration) {
-                       removeBuffStack(state.activeBuffs, "Purge the Wicked");
-                       removeBuffStack(state.activeBuffs, "Shadow Word: Pain");
-                   }
-               }
+                    buff.expiration -= expiationDuration;
+                    if (state.t >= buff.expiration) {
+                        removeBuffStack(state.activeBuffs, "Purge the Wicked");
+                        removeBuffStack(state.activeBuffs, "Shadow Word: Pain");
+                    }
+                }
 
-           }
+            }
 
-       })
+        }
+       discSpells["Mind Blast"].push(expiation);
+       discSpells["Shadow Word: Death"].push(expiation);
    }
    if (talents.darkIndulgence) {
        discSpells["Mind Blast"][0].cost *= 0.6; // 40% cost reduction.
@@ -227,13 +228,13 @@ export const applyLoadoutEffects = (discSpells, settings, talents, state, stats,
 
    // Tier 4 talents
    if (talents.improvedFlashHeal) discSpells["Flash Heal"][0].coeff *= 1.15;
+
    if (talents.bindingHeals) {
        discSpells["Flash Heal"].push({
            type: "heal",
            castTime: discSpells["Flash Heal"][0].castTime,
            coeff: discSpells["Flash Heal"][0].coeff * 0.2,
-           atonement: 15,
-           atonementPos: 'end',
+           atonement: 15, // Need to limit applications, currently allows 20 atonements with 10 casts instead of 11
            targets: 1,
            secondaries: ['crit', 'vers'],
            overheal: 0.5,
